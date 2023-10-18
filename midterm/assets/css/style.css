@@ -1,0 +1,326 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #EEE2C8;
+    font-family: Merriweather;
+    color: #333;
+}
+header {
+    left: 0px;
+    top: 0px;
+    background-color: #EEE2C8;
+    border-bottom: 1px solid #7B7554;
+    position: fixed;
+    display: flex;
+    height: 80px;
+    width: 100%;
+    justify-content: space-between;
+}
+.title {
+    display: flex;
+    font-weight: lighter;
+    font-style: italic;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1%;
+    padding-bottom: 2%;
+    color:#333;
+}
+#title--main {
+    font-size: 30pt;
+    margin-bottom: 0px;
+}
+#title--sub {
+    font-size: 12pt;
+    font-style: italic;
+    margin: 0px;
+    padding-right: 10px;
+}
+.nav-bar {
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 14pt;
+}
+.nav--button {
+    display: flex;
+    align-items: center;
+    margin: 15px;
+}
+.nav--button:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.main {
+    margin-top: 80px;
+    position: relative;
+    background-image: linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.75)), url("../img/background.jpeg");
+    background-color: #f2e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    order: -1;
+    flex-wrap: wrap;
+    padding-bottom: 30px;
+}
+.main-1, .main-2, .main-3 {
+    margin-bottom: 80px;
+    padding: 20px;
+    margin-left: 10px;
+    margin-right: 20px;
+}
+.section-header {
+    left: 0;
+    top: 0;
+    padding-left: 5px;
+    position: relative;
+    text-align: left;
+    border-bottom: 1px solid #7B7554;
+    font-size: 16pt;
+    color: #333;
+    width: 100%;
+    font-family: Khula, sans-serif;
+    font-weight: bolder;
+}
+.main-1 {
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+}
+.main--img {
+    display: flex;
+    position: relative;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 70%;
+    height: 50%;
+    margin-right: 30px;
+}
+.main--img img {
+    display: flex;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+.main-img---caption {
+    position: absolute;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    bottom: 5%;
+    left: 4%;
+    backdrop-filter: blur(5px);
+    font-size: 125%;
+    color: #333;
+    border-left: 2px solid #ADF7B6;
+    border-radius: 5%;
+    width: 25%;
+    height: 10%;
+    opacity: 0.9;
+    padding-left: 1%;
+}
+.main--blurb {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+}
+.main-blurb---blurb {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    font-size: 14pt;
+    flex-wrap: wrap;
+    left: 20%;
+}
+.sub-blurb {
+    font-size: 12pt;
+}
+.main-blurb---hours {
+    padding: 5%;
+    font-size: 13pt;
+    border-left: 2px solid #8EB8E5;
+}
+.main--online-order {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    font-family: Khula;
+    font-weight: 600;
+    font-size: large;
+}
+#order-button {
+    width: 100%;
+    height: fit-content;
+    background-color: #e7d790;
+    color: #DC6262;
+    border-radius: 2%;
+    padding: 5%;
+}
+#order-button:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+}
+#order-button h2:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+.main-2 {
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+}
+.menu {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: space-evenly;
+    width: 50%;
+}
+.menu-items {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    padding: 0px 0px 20px 10px;
+    margin-top: 5px;
+}
+.menu-item {
+    margin-bottom: 10px;
+    font-size: large;
+    font-weight: lighter;
+}
+.menu-sub-desc {
+    position: relative;
+    margin-left: 5%;
+    color:#7B7554;
+    font-size: medium;
+}
+.map {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    width: 40%;
+}
+.map img {
+    width: 100%;
+    height: 80%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+#map-caption {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    color:#DC6262;
+    font-size: large;
+}
+.main-3 {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.reviews {
+    display: flex;
+    position: relative;
+    justify-content: center;
+}
+.review {
+    padding: 0px 10px 0px 30px;
+    line-height: 1.7;
+}
+.review-id {
+    display: flex;
+    position: relative;
+}
+.main-4 {
+    display: flex;
+    position: relative;
+    justify-content: space-around;
+    align-items: center;
+}
+.hours {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    width: 30%;
+    margin: 20px;
+}
+.hours-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.hours-days {
+    display: flex;
+    position: relative;
+    flex-flow: column wrap;
+    padding: 10px;
+    line-height: 2;
+    word-spacing: 9999rem;
+}
+.hours-times {
+    text-align: right;
+    line-height: 2;
+    padding: 10px;
+    min-width: 156px;
+}
+.storefront {
+    display: flex;
+    position: relative;
+    width: 50%;
+    height: 50%;
+    flex-direction: column;
+}
+.storefront img {
+    object-fit: cover;
+    border-radius: 5%;
+    width: 100%;
+    height: 100%;
+    margin-bottom: 10px;
+}
+#contact {
+    display: flex;
+    position: relative;
+    justify-content: center;
+}
+/* Menu CSS */
+.menu-section-header {
+    position: relative;
+    text-align: center;
+    border-bottom: 1px solid #7B7554;
+    font-size: 16pt;
+    color: #333;
+    width: 100%;
+    font-family: Khula;
+    font-weight: bold;
+}
+.menu-section {
+    margin: 10px 0px 20px 0px;
+    width: 80%;
+}
+.full-menu-item {
+    display: flex;
+    justify-content: space-between;
+}
+.price {
+    font-weight: bolder;
+    font-size: large;
+    text-align: right;
+}
+.menu-page .menu-items, .price {
+    margin: 10px;
+    width: 100%;
+}
