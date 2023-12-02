@@ -1,0 +1,141 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+body {
+    background-image: url('../img/snow_2.webp'), linear-gradient(to bottom, #C3EEFA, #6CABC0);
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    margin: 0px;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+}
+h1 {
+    font-family: Cookie;
+    font-size: 64px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -225%) translateZ(50px);
+    width: 450px;
+    display: flex;
+    justify-content: center;
+    color: #130303;
+    /* background-color: aqua; */
+    padding: 20px; /* Adjust padding as needed */
+    border-radius: 10px; /* Rounded corners for effect */
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+.button-container {
+    display: flex;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -25%) translateZ(50px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-flow: column wrap;
+    width: fit-content;
+    height: auto;
+    padding: 20px;
+}
+#rsvp {
+    width: 150px;
+    height: 100px;
+    border-radius: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Shining effect */
+    background: radial-gradient(circle at 30% 30%, #ECE8EF 0%, transparent 60%);
+    animation: shine 3s infinite linear;
+
+    /* Floating effect */
+    animation: float 1s infinite ease-in-out alternate;
+
+    /* Box shadow */
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+}
+@keyframes shine {
+    0%, 100% {
+        background-position: -50px -50px;
+    }
+    50% {
+        background-position: 100px 100px;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, -5px);
+    }
+    100% {
+        transform: translate(0, 5px);
+    }
+}
+.button-jump-container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    width: fit-content;
+    padding: 20px;
+}
+.button {
+    font-family: Nunito Sans;
+    font-size: 36px;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+    border-radius: 70%;
+    width: 200px;
+    transition: box-shadow 0.3s ease;
+    padding: 10px;
+    margin: 10px;
+}
+.snowman-container {
+    position: absolute;
+    right: 25%;
+    bottom: 25%;
+    display: flex;
+    align-items: center;
+}
+#snowman {
+    position: absolute;
+    height: 300px;
+    width: auto;
+    z-index: 1;
+}
+
+@keyframes bounceSnowman {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-40px);
+        transition: height 0.5s ease-in-out;
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+a {
+    text-decoration: none; 
+    color: #130303; 
+    transition: box-shadow 0.3s ease;
+    padding: 20px;
+}
+
+a:visited {
+    text-decoration: none; 
+}
+
+a:hover {
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 0, 0, 0.4);
+}
