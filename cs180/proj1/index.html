@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Proj1</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <script src="assets/js/script.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <h1>Colorizing the Prokudin-Gorskii Photo Collection</h1>
+    <h2>By: Evan Chang</h2>
+    <h3>CS 180 Project 1</h3>
+
+</head>
+<body>
+    <div class="section">
+        <h4>Introduction</h4>
+        <p>
+            The Prokudin-Gorskii Photo Collection is a collection of 
+        </p>
+    </div>
+    <div class="section">
+        <h4>Naive Implementation</h4>
+        <p>
+            I began by implementing a naive implementation of stitching together the color plates of the Prokudin-Gorskii photos.
+            Simply stitching together the three different color plates would not yield a great result, as the plates are not perfectly aligned.
+            Therefore, I attempted to choose a reference frame (the blue frame) and align the other two frames to this reference frame by using a simple exhaustive search algorithm.
+            I iterated through a user input amount of horizontal and vertical pixel shifts (from -15 to 15) looking for the shift that produced the largest value of the chosen metric.
+            The two metrics I used were:
+        </p>
+        <ol>
+            <li>Negative Sum of Squared Differences (SSD)</li>
+            <p>
+                \[NSSD = -\sum_{i=1}^{n} (I_1(i) - I_2(i))^2\]
+            </p>
+            <li>Normalized Cross-Correlation (NCC)</li>
+            <p>
+                \[NCC = \frac{\sum_{i=1}^{n} (I_1(i) - \bar{I_1})(I_2(i) - \bar{I_2})}{\sqrt{\sum_{i=1}^{n} (I_1(i) - \bar{I_1})^2 \sum_{i=1}^{n} (I_2(i) - \bar{I_2})^2}}\]
+            </p>
+        </ol>
+        I tested out the naive implementation on small images and found that they both had comparable performance. They both produced more clear images than simply stacking the three channels together with no shift. 
+        I ended up choosing to use the NCC metric for all future steps.
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/default_aligned_monastery.jpg" alt="Default Monastery Stack">
+                <div class="caption">Default Alignment (no shift)</div>
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/output/naive_aligned_monastery_ncc.jpg" alt="NCC Aligned Monastery">
+                <div class="caption">Alignment Using NCC Metric &emsp; R: (3, 2) &nbsp; G: (-3, 2)</div>
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/output/naive_aligned_monastery_nssd.jpg" alt="NSSD Aligned Monastery">
+                <div class="caption">Alignment Using NSSD Metric &emsp; R: (3, 2) &nbsp; G: (-3, 2)</div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h4>Image Pyramid Implementation</h4>
+        <p>
+            While the naive implementation works decently well for the smaller images, because the other images were on the order of 10x larger, the naive impelmentation would require search widths of over 100 pixels, and thus would be too slow to run.
+            To speed up the search process, I implemented an image pyramid algorithm. The image pyramid algorithm works by creating a series of images that are downsampled by a factor of 2 each time until they are around 32 pixels along the shortest axis. The algorithm then starts by searching for the best shift in the smallest image, and then uses this shift to search for the best shift in the next largest image, and so on.
+            Becuase it can do more of the searching in smaller images, this algorithm runs much faster than it would take for searching through the full images. While I initially used a Gaussian filter before downsampling to avoid aliasing, I found that leaving out the filtering significantly sped up the algorithm while not significantly affecting the results. I therefore chose to just downsample in the offset searching process. 
+            This ultimately worked well for almost every image in the library I ran the algorithm on.
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_onion_church_ncc.jpg" alt="Pyramid Aligned Onion Church">
+                <div class="caption">Aligned Onion Church</div>
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_melons_ncc.jpg" alt="Pyramid Aligned Melons">
+                <div class="caption">Aligned Melons</div>
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_sculpture_ncc.jpg" alt="Pyramid Aligned Sculpture">
+                <div class="caption">Aligned Sculpture</div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h4>Bells & Whistles</h4>
+        <h5>SSIM Metric</h6>
+        <p>
+            One image that performed very poorly with the default image pyramid and metrics I chose was the image of Emir. 
+            Because of the difference between the pixel brightness in each channel, the red channel ends up being aligned to be way off from where it should be.
+            However, using the Structural Similarity Index (SSIM) metric, I was able to get a much better alignment for this image. 
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_emir_ncc.jpg" alt="Pyramid Aligned Emir">
+                <div class="caption">NCC Alignment</div>
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_emir_ssim.jpg" alt="SSIM Aligned Emir">
+                <div class="caption">SSIM Alignment</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+html {
+    color: #333;
+}
+.img-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 2% 0;
+    gap: 20px;
+}
+.img-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+.img-container img {
+    max-width: 100%;
+    height: auto
+}
+/* .img-container img:active {
+    transform: scale(3);
+} */
+.img-container caption {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
