@@ -30,6 +30,7 @@ h1 {
 }
 
 #overall-container {
+    display: flex;
     height: 100vh;
     display: flex;
     flex-direction: row;

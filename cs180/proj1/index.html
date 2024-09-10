@@ -5,95 +5,192 @@
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <script src="assets/js/script.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <h1>Colorizing the Prokudin-Gorskii Photo Collection</h1>
-    <h2>By: Evan Chang</h2>
-    <h3>CS 180 Project 1</h3>
-
 </head>
 <body>
+    <header>
+        <h1>Colorizing the Prokudin-Gorskii Photo Collection</h1>
+        <h2>By: Evan Chang</h2>
+        <h3>CS 180 Project 1</h3>
+    </header>
     <div class="section">
         <h4>Introduction</h4>
-        <p>
-            The Prokudin-Gorskii Photo Collection is a collection of 
-        </p>
+        <div class="section-body">
+            The Prokudin-Gorskii Photo Collection is a collection of photos taken by Sergei Mikhailovich Prokudin-Gorskii in the early 1900s. The collection includes thousands of images othe Russian Empire, and is notable for being some of the first color photographs ever taken.
+            Despite the fact that there were no ways to display color images at the time, Prokudin-Gorskii was able to take color photographs by taking three separate black and white photographs of the same scene, each with a different color filter in front of the lens.
+            These were later bought by the Library of Congress and digitized, and are now available to the public.
+            In this project, I attempted to colorize these images by aligning the three color plates and stacking them together to form a colorized image of the scene.
+            <div class="img-container">
+                <img src="assets/imgs/monastery.jpg" alt="Monastery" id="vertical-img">
+                <div class="caption">Example of a Prokudin-Gorskii Photo <br> Channels from top to bottom: Blue, Green, Red</div>
+            </div>
+        </div>
     </div>
     <div class="section">
         <h4>Naive Implementation</h4>
-        <p>
-            I began by implementing a naive implementation of stitching together the color plates of the Prokudin-Gorskii photos.
-            Simply stitching together the three different color plates would not yield a great result, as the plates are not perfectly aligned.
-            Therefore, I attempted to choose a reference frame (the blue frame) and align the other two frames to this reference frame by using a simple exhaustive search algorithm.
-            I iterated through a user input amount of horizontal and vertical pixel shifts (from -15 to 15) looking for the shift that produced the largest value of the chosen metric.
-            The two metrics I used were:
-        </p>
-        <ol>
-            <li>Negative Sum of Squared Differences (SSD)</li>
+        <div class="section-body">
             <p>
-                \[NSSD = -\sum_{i=1}^{n} (I_1(i) - I_2(i))^2\]
+                I began by implementing a naive implementation of stitching together the color plates of the Prokudin-Gorskii photos.
+                Simply stitching together the three different color plates would not yield a great result, as the plates are not perfectly aligned.
+                Therefore, I attempted to choose a reference frame (the blue frame) and align the other two frames to this reference frame by using a simple exhaustive search algorithm.
+                I iterated through a user input amount of horizontal and vertical pixel shifts (from -15 to 15) looking for the shift that produced the largest value of the chosen metric.
+                The two metrics I used were:
             </p>
-            <li>Normalized Cross-Correlation (NCC)</li>
-            <p>
-                \[NCC = \frac{\sum_{i=1}^{n} (I_1(i) - \bar{I_1})(I_2(i) - \bar{I_2})}{\sqrt{\sum_{i=1}^{n} (I_1(i) - \bar{I_1})^2 \sum_{i=1}^{n} (I_2(i) - \bar{I_2})^2}}\]
-            </p>
-        </ol>
-        I tested out the naive implementation on small images and found that they both had comparable performance. They both produced more clear images than simply stacking the three channels together with no shift. 
-        I ended up choosing to use the NCC metric for all future steps.
-        <div class="img-row">
-            <div class="img-container">
-                <img src="assets/imgs/output/default_aligned_monastery.jpg" alt="Default Monastery Stack">
-                <div class="caption">Default Alignment (no shift)</div>
-            </div>
-            <div class="img-container">
-                <img src="assets/imgs/output/naive_aligned_monastery_ncc.jpg" alt="NCC Aligned Monastery">
-                <div class="caption">Alignment Using NCC Metric &emsp; R: (3, 2) &nbsp; G: (-3, 2)</div>
-            </div>
-            <div class="img-container">
-                <img src="assets/imgs/output/naive_aligned_monastery_nssd.jpg" alt="NSSD Aligned Monastery">
-                <div class="caption">Alignment Using NSSD Metric &emsp; R: (3, 2) &nbsp; G: (-3, 2)</div>
+            <ol>
+                <li>Negative Sum of Squared Differences (SSD)</li>
+                <p>
+                    \[\text{NSSD}(u, v) = -\sum_{(x, y) \in N} [I(u + x, v + y) - P(x, y)]^2\]
+                </p>
+                <li>Normalized Cross-Correlation (NCC)</li>
+                <p>
+                    \[\text{NCC}(u, v) = \frac{\sum_{(x,y)\in N} (I(u+x,v+y) - \bar{I})(P(x, y) - \bar{P})}{\sqrt{\sum_{(x, y) \in N} \left[I(u+x, v+y) - \bar{I}\right]^2 \sum_{(x, y) \in N} \left[P(x, y) - \bar{P}\right]^2}}\]
+                </p>
+            </ol>
+            Since the edges of the image were not all the same and included some slight shifts and imperfections, I also chose to use the inner 85% of the image instead of the whole image.
+            I tested out the naive implementation on small images and found that they both had comparable performance. They both produced more clear images than simply stacking the three channels together with no shift. 
+            I ended up choosing to use the NCC metric for all future steps.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/output/default_aligned_monastery.jpg" alt="Default Monastery Stack">
+                    <div class="caption">Default Alignment (no shift)</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/output/naive_aligned_monastery_ncc.jpg" alt="NCC Aligned Monastery">
+                    <div class="caption">Alignment Using NCC Metric &emsp; R: (3, 2) &nbsp; G: (-3, 2)</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/output/naive_aligned_monastery_nssd.jpg" alt="NSSD Aligned Monastery">
+                    <div class="caption">Alignment Using NSSD Metric &emsp; R: (3, 2) &nbsp; G: (-3, 2)</div>
+                </div>
             </div>
         </div>
     </div>
     <div class="section">
         <h4>Image Pyramid Implementation</h4>
-        <p>
-            While the naive implementation works decently well for the smaller images, because the other images were on the order of 10x larger, the naive impelmentation would require search widths of over 100 pixels, and thus would be too slow to run.
-            To speed up the search process, I implemented an image pyramid algorithm. The image pyramid algorithm works by creating a series of images that are downsampled by a factor of 2 each time until they are around 32 pixels along the shortest axis. The algorithm then starts by searching for the best shift in the smallest image, and then uses this shift to search for the best shift in the next largest image, and so on.
-            Becuase it can do more of the searching in smaller images, this algorithm runs much faster than it would take for searching through the full images. While I initially used a Gaussian filter before downsampling to avoid aliasing, I found that leaving out the filtering significantly sped up the algorithm while not significantly affecting the results. I therefore chose to just downsample in the offset searching process. 
-            This ultimately worked well for almost every image in the library I ran the algorithm on.
-        </p>
-        <div class="img-row">
-            <div class="img-container">
-                <img src="assets/imgs/output/pyramid_aligned_onion_church_ncc.jpg" alt="Pyramid Aligned Onion Church">
-                <div class="caption">Aligned Onion Church</div>
-            </div>
-            <div class="img-container">
-                <img src="assets/imgs/output/pyramid_aligned_melons_ncc.jpg" alt="Pyramid Aligned Melons">
-                <div class="caption">Aligned Melons</div>
-            </div>
-            <div class="img-container">
-                <img src="assets/imgs/output/pyramid_aligned_sculpture_ncc.jpg" alt="Pyramid Aligned Sculpture">
-                <div class="caption">Aligned Sculpture</div>
+        <div class="section-body">
+            <p>
+                While the naive implementation works decently well for the smaller images, because the other images were on the order of 10x larger, the naive impelmentation would require search widths of over 100 pixels, and thus would be too slow to run.
+                To speed up the search process, I implemented an image pyramid algorithm. The image pyramid algorithm works by creating a series of images that are downsampled by a factor of 2 each time until they are around 32 pixels along the shortest axis. The algorithm then starts by searching for the best shift in the smallest image, and then uses this shift to search for the best shift in the next largest image, and so on.
+                Becuase it can do more of the searching in smaller images, this algorithm runs much faster than it would take for searching through the full images. While I initially used a Gaussian filter before downsampling to avoid aliasing, I found that leaving out the filtering significantly sped up the algorithm while not significantly affecting the results. I therefore chose to just downsample in the offset searching process. 
+                This ultimately worked well for almost every image in the library I ran the algorithm on.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/output/pyramid_aligned_onion_church_ncc.jpg" alt="Pyramid Aligned Onion Church">
+                    <div class="caption">Aligned Onion Church</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/output/pyramid_aligned_melons_ncc.jpg" alt="Pyramid Aligned Melons">
+                    <div class="caption">Aligned Melons</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/output/pyramid_aligned_sculpture_ncc.jpg" alt="Pyramid Aligned Sculpture">
+                    <div class="caption">Aligned Sculpture</div>
+                </div>
             </div>
         </div>
     </div>
     <div class="section">
         <h4>Bells & Whistles</h4>
-        <h5>SSIM Metric</h6>
-        <p>
-            One image that performed very poorly with the default image pyramid and metrics I chose was the image of Emir. 
-            Because of the difference between the pixel brightness in each channel, the red channel ends up being aligned to be way off from where it should be.
-            However, using the Structural Similarity Index (SSIM) metric, I was able to get a much better alignment for this image. 
-        </p>
-        <div class="img-row">
-            <div class="img-container">
-                <img src="assets/imgs/output/pyramid_aligned_emir_ncc.jpg" alt="Pyramid Aligned Emir">
-                <div class="caption">NCC Alignment</div>
-            </div>
-            <div class="img-container">
-                <img src="assets/imgs/output/pyramid_aligned_emir_ssim.jpg" alt="SSIM Aligned Emir">
-                <div class="caption">SSIM Alignment</div>
+        <div class="section-body">
+            <h5>SSIM Metric</h5>
+            <p>
+                One image that performed very poorly with the default image pyramid and metrics I chose was the image of Emir. 
+                Because of the difference between the pixel brightness in each channel, the red channel ends up being aligned to be way off from where it should be.
+                However, using the Structural Similarity Index (SSIM) metric, I was able to get a much better alignment for this image and comparable results for the rest of the images in the library.
+                The SSIM metric is a metric that compares the similarity between two images by comparing the luminance, contrast, and structure of the images and is calculated as follows: 
+            </p>
+            <p>
+                \[\text{SSIM}(u, v) = \frac{(2\mu_u\mu_v + c_1)(2\sigma_{uv} + c_2)}{(\mu_u^2 + \mu_v^2 + c_1)(\sigma_u^2 + \sigma_v^2 + c_2)}\]
+                where:
+                <ul>
+                    <li>\(\mu_u\) and \(\mu_v\) are the average pixel values of the two images</li>
+                    <li>\(\sigma_u^2\) and \(\sigma_v^2\) are the variances of the two images</li>
+                    <li>\(\sigma_{uv}\) is the covariance of the two images</li>
+                    <li>\(c_1\) and \(c_2\) are constants to avoid division by zero</li>
+                </ul>
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/output/pyramid_aligned_emir_ncc.jpg" alt="Pyramid Aligned Emir">
+                    <div class="caption">NCC Alignment</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/output/pyramid_aligned_emir_ssim.jpg" alt="SSIM Aligned Emir">
+                    <div class="caption">SSIM Alignment</div>
+                </div>
             </div>
         </div>
+    </div>
+    <div class="section">
+        <div class="section-body">
+        <h4>Final Results:</h4>
+        <div class="results-imgs">
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_emir_ssim.jpg" alt="SSIM Aligned emir">
+                <div class="caption">Red Offset: (104, 40), Green Offset: (48, 20)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_monastery_ssim.jpg" alt="SSIM Aligned monastery">
+                <div class="caption">Red Offset: (2, 2), Green Offset: (-4, 2)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_church_ssim.jpg" alt="SSIM Aligned church">
+                <div class="caption">Red Offset: (58, -4), Green Offset: (26, 4)</div>
+            </div>
+        </div>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_three_generations_ssim.jpg" alt="SSIM Aligned three_generations">
+                <div class="caption">Red Offset: (110, 10), Green Offset: (52, 14)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_melons_ssim.jpg" alt="SSIM Aligned melons">
+                <div class="caption">Red Offset: (178, 12), Green Offset: (80, 10)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_onion_church_ssim.jpg" alt="SSIM Aligned onion_church">
+                <div class="caption">Red Offset: (108, 36), Green Offset: (52, 26)</div>
+            </div>
+        </div>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_train_ssim.jpg" alt="SSIM Aligned train">
+                <div class="caption">Red Offset: (86, 30), Green Offset: (40, 6)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_tobolsk_ssim.jpg" alt="SSIM Aligned tobolsk">
+                <div class="caption">Red Offset: (6, 4), Green Offset: (2, 2)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_icon_ssim.jpg" alt="SSIM Aligned icon">
+                <div class="caption">Red Offset: (88, 22), Green Offset: (40, 16)</div>
+            </div>
+        </div>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_cathedral_ssim.jpg" alt="SSIM Aligned cathedral">
+                <div class="caption">Red Offset: (12, 4), Green Offset: (4, 2)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_self_portrait_ssim.jpg" alt="SSIM Aligned self_portrait">
+                <div class="caption">Red Offset: (174, 36), Green Offset: (78, 28)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_harvesters_ssim.jpg" alt="SSIM Aligned harvesters">
+                <div class="caption">Red Offset: (122, 12), Green Offset: (58, 14)</div>
+            </div>
+        </div>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_sculpture_ssim.jpg" alt="SSIM Aligned sculpture">
+                <div class="caption">Red Offset: (140, -26), Green Offset: (34, -10)</div>
+            </div>
+        <div class="img-container">
+                <img src="assets/imgs/output/pyramid_aligned_lady_ssim.jpg" alt="SSIM Aligned lady">
+                <div class="caption">Red Offset: (118, 12), Green Offset: (56, 8)</div>
+            </div>
+                
     </div>
 </body>
 </html>
