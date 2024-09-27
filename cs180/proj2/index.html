@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Proj2</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <script src="assets/js/script.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Fun with Filters and Frequencies</h1>
+        <h2>By: Evan Chang</h2>
+        <h2>CS 180 Project 2</h2>
+    </header>
+    <div class="section">
+        <h3>Part 1: Fun with Filters</h3>
+        <h4>Finite Difference Operator</h4>
+        <div class="section-body">
+            A common task in image processing is finding the edges in an image along both the horizontal and vertical directions. This is often done by computing the gradients of the image along the x and y directions.
+            This can be simply done by convolving the image with simple kernels that approximate the derivative of the image using finite differences. These kernels are simply taking the difference between two consecutive pixels in the image as an approximation of the true derivative.
+            $$\text{Gradient in x direction: } \matrix{D_x} = \begin{bmatrix} 1 -1 \end{bmatrix}$$
+            $$\text{Gradient in y direction: } \matrix{D_y} = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$$
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/camerman_dx.jpg" alt="Image Gradient (dx)">
+                    <div class="caption">Image Gradient (dx)</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/camerman_dy.jpg" alt="Image Gradient (dy)">
+                    <div class="caption">Image Gradient (dy)</div>
+                </div>
+            </div>
+            We can also compute the magnitude of the gradient by taking the square root of the sum of the squares of the gradients in the x and y directions to visualize the edges in the image.
+            In order to remove some of the noise, we also can threshold the gradient magnitude to get a clearer picture of the edges in the image.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/camerman_grad.jpg" alt="Image Gradient Magnitude">
+                    <div class="caption">Image Gradient Magnitude</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/cameraman_grad_bin.jpg" alt="Thresholded Image Gradient Magnitude">
+                    <div class="caption">Thresholded Image Gradient Magnitude (threshold=0.27)</div>
+                </div>
+            </div>
+        </div>
+        <h4>Derivative of Gaussian (DoG) Filter</h4>
+        <div class="section-body">
+            We can also smooth out our gradient magnitude edges by smoothing image first using a Gaussian filter. Convolving our image with a Gaussian filter gives us a cleaner picture of the edges.
+            When we thresholded, we could tell we were only displaying the stronger edges and there was less noise in the image. However, there were also some gaps in the edges that we did have due to this thresholding.
+            We can see in the smoothed version that the edges are more continuous and there are less gaps in the edges. 
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/cameraman_grad_bin.jpg" alt="Thresholded Image Gradient Magnitude">
+                    <div class="caption">Thresholded Image Gradient Magnitude (non-smoothed)</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/cameraman_grad_smooth.jpg" alt="Thresholded Image Gradient Magnitude (smoothed)">
+                    <div class="caption">Thresholded Image Gradient Magnitude (smoothed)</div>
+                </div>
+            </div>
+            Due to the linear nature of convolutions, we can also compute this smoothed gradient magnitude using only one filter instead of two. This filter is known as the Derivative of Gaussian (DoG) filter and works by convolving the Gaussian with the finite difference operators first.
+            Since these are much smaller than the image, we can convolve the Gaussian with the finite difference operators first and then convolve the result with the image to get the same result in less time.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/cameraman_grad_smooth.jpg" alt="Image Gradient with Two Convolutions">
+                    <div class="caption">Two Convolutions</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/cameraman_smooth_grad_single.jpg" alt="Image Gradient (DoG)">
+                    <div class="caption">Single Convolution (DoG filter)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Part 2: Fun with Frequencies!</h3>
+        <h4>Image Sharpening</h4>
+        <div class="section-body">
+            Another common task in image processing is image sharpening. A simple way we can accomplish this is by simply adding more of the high frequency components back into the image.
+            We can get the high frequency portions by simply subtracting the blurred image from the original image. This will give us the high frequency components of the image which we can add back with an enhancement factor to "sharpen" the image.
+            Combining these operations into one filter gives us the unsharp mask filter. The process is outlined below for two example images:
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/ex_sharpening_process.png" alt="Image Sharpening Process">
+                    <div class="caption">Image Sharpening Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/costco_sharpening_process.png" alt="Costco Sharpening Process">
+                    <div class="caption">Costco Sharpening Process</div>
+                </div>
+            </div>
+
+            Here are some results from testing this filter on several blurry images.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/taj.jpg" alt="Sharpened Image">
+                    <div class="caption">Original Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/taj_sharpened.jpg" alt="Original Image">
+                    <div class="caption">Sharpened Image</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/costco.jpg" alt="Picture of Blurry Costco's Entrance">
+                    <div class="caption">Blurry Costco</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/costco_sharpened.jpg" alt="Sharpened Costco">
+                    <div class="caption">Sharpened Costco</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/moo.jpg" alt="Blurry Picture of Concert Stage">
+                    <div class="caption">Blurry Concert Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/moo_sharpened.jpg" alt="Sharpened Concert">
+                    <div class="caption">Sharpened Concert Image</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/ive.jpeg" alt="Blurry Picture of IVE concert">
+                    <div class="caption">Blurry IVE Concert Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/ive_sharpened.jpg" alt="Sharpened IVE Concert">
+                    <div class="caption">Sharpened IVE Concert Image</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/bird.jpg" alt="Picture of Cedar Waxwing in a tree">
+                    <div class="caption">(Not so Blurry) Bird Picture</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/bird_sharpened.jpg" alt="Sharpened picture of Cedar Waxwing in a tree">
+                    <div class="caption">Sharpened Bird Picture</div>
+                </div>
+            </div>
+            From these examples, we can see that the unsharp mask filter does a good job of enhancing some of the higher frequency components. It does particularly good with the lines in building structures.
+            However, it is far from perfect as an unblurring filter since it is only able to enhance the edges that are already present in the image. It is not able to recover any lost details from the original image.
+            For fun, this is what happens when we apply the unsharp mask filter to a blurred and re-sharpened image:
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/oski.jpg" alt="Picture of Oski">
+                    <div class="caption">Oski</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/oski_sharpened.jpg" alt="Sharpened Oski">
+                    <div class="caption">Sharpened Oski</div>
+                </div>
+            </div>
+            This image was already decently sharp. I then attempted to blur it and re-sharpen it. The result is an image of oski with even sharper edges than the original.
+        </div>
+        <h4>Hybrid Images</h4>
+        <div class="section-body">
+            In this section, we will be creating hybrid images by combining the low frequency components of one image with the high frequency components of another image.
+            Since human's perceive low frequency much better than high frequency, up close, we will see mostly the image with low-pass components. However, when viewed from afar, we can see the elements of the high-pass filtered image.
+            Similar to before, we can get the low-pass components by blurring the image with a Gaussian filter. We can get the high-pass components by subtracting the low-pass filtered image from the original image. We then can average the two filtered images to produce our hybrid image.
+            We can control the amount of high frequency components in the image by adjusting the sigma of the Gaussian filter. The higher the sigma, the more high frequency components we will have in the image. This is also the same for the low frequency components.
+            Before doing this, in order for the image to hybridize properly, we first aligned the two images by matching up two points and resizing them to the same dimensions.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/nutmeg.jpg" alt="Cat">
+                    <div class="caption">Nutmeg the Cat</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/derek.jpg" alt="Human">
+                    <div class="caption">Derek the Human</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/default_hybrid_image.jpg" alt="Hybrid Image">
+                    <div class="caption">Hybrid Image</div>
+                </div>
+            </div>
+            We can visualize the frequency response of these images by taking the Fourier Transform of the images and plotting the magnitude of the Fourier Transform.
+            As we can see in these plots of the magnitude of the Fourier Transform, we only keep the low frequency portions of image 1 and the high frequency portions of image 2 to create the hybrid image.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/hybrid_fft.png" alt="Hybrid Image Fourier Transform">
+                    <div class="caption">Hybrid Image Fourier Transform (for Miles-Monkey Hybrid)</div>
+                </div>
+            </div>
+            Here are some other examples of hybrid images:
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/miles.jpg" alt="Image of My Roomate">
+                    <div class="caption">Miles (my roomate)</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/monkey.jpg" alt="Image of a Monkey">
+                    <div class="caption">Monkey</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/miles_monkey_hybrid_image.jpg" alt="Miles-Monkey Hybrid">
+                    <div class="caption">Miles-Monkey Hybrid Image</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/dom.jpg" alt="Image of Dominic">
+                    <div class="caption">Dom (old roomate)</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/wizard.jpg" alt="Image of Wizard Monkey">
+                    <div class="caption">Wizard Monkey</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/dom_wizard_hybrid_image.jpg" alt="Dom-Wizard Hybrid">
+                    <div class="caption">Dom-Wizard Hybrid Image</div>
+                </div>
+            </div>
+            This last image did not turn out great. I believe this was mostly because the shapes and color schemes of the two images were a little bit too off.
+            It ended up only really looking like one image with a slight ghost of the other image.
+        </div>
+    </div>
+    <div class="section">
+        <h3>Multi-resolution Blending</h3>
+        <h4>Introduction:</h4>
+        <div class="section-body">
+            Another common task in image processing is to blend two images together. If we just did so by simply splicing the two pictures together, we would end up with a sharp line between the two images.
+            We can improve this by using multiresolution blending to smooth out this seam between the two images. This is done by blending the two images at different resolutions and then combining them together.
+        </div>
+        <h4>Gaussian and Laplacian Stacks</h4>
+        <div class="section-body">
+            In order to separate our images into different resolutions, we use Gaussian and Laplacian Stacks. These breakdown our images into different frequency resolutions which we can then use later to combine together.
+            Unlike the Gaussian pyramid we created in project 1, we can create a Gaussian Stack by simply applying a Gaussian kernel with increasing sigma values to the image. We can similarly get the Laplacian Stack by subtracting the different levels of the Gaussian stack.
+            Here is our visualized Gaussian and Laplacian stacks for an apple:
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/apple_stacks.png" alt="Apple">
+                    <div class="caption">Gaussian and Laplacian Stacks of an Apple</div>
+                </div>
+            </div>
+        </div>
+        <h4>Implementing Multi-resolution Blending</h4>
+        <div class="section-body">
+            Following the method described in the paper by Burt and Adelson, we can blend two images together by first creating the Gaussian and Laplacian stacks for both images. We also applied a Gaussian Stack to the mask in order to resolve the jagged edges of a simple spline We also applied a Gaussian Stack to the mask in order to resolve the jagged edges of a simple spline blend.
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/multiresolution_combine.png" alt="Image of Multiresolution Blending Process">
+                    <div class="caption">Multiresolution Blending Process</div>
+                </div>
+            </div>
+            Here are my results from blending two images together:
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/oraple_blending.png" alt="Oraple Blending">
+                    <div class="caption">Oraple Blending Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/oraple.jpg" alt="Oraple">
+                    <div class="caption">Oraple</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/lance_kenny_blend.png" alt="Lance-Kenny Blending">
+                    <div class="caption">Lance-Kenny Blending Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/lance_kenny.jpg" alt="Lance-Kenny">
+                    <div class="caption">Lance-Kenny</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/costco_glade_hybrid.png" alt="Costco Glade Blending Process">
+                    <div class="caption">Costco-Glade Blending Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/costco_glade.jpg" alt="Costco-Glade">
+                    <div class="caption">Costco-Glade</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/wellman_fantasy_sky_blend.png" alt="Wellman-Fantasy-Sky Blending Process">
+                    <div class="caption">Dark Wellman Bright Sky Blending Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/wellman_fantasy_sky.jpg" alt="Wellman-Fantasy-Sky">
+                    <div class="caption">Dark Wellman Bright Sky</div>
+                </div>
+            </div>
+
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/dark_wellman_dark_sky_blend.png" alt="Dark-Wellman-Dark-Sky Blending Process">
+                    <div class="caption">Dark-Wellman-Dark-Sky Blending Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/wellman_dark_fantasy_sky.jpg" alt="Dark-Wellman-Dark-Sky">
+                    <div class="caption">Dark-Wellman-Dark-Sky</div>
+                </div>
+            </div>
+                        <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/bright_wellman_fantasy_sky.png" alt="Bright-Wellman-Fantasy-Sky Blending Process">
+                    <div class="caption">Bright-Wellman-Fantasy-Sky Blending Process</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/bright_wellman_fantasy_sky.jpg" alt="Bright-Wellman-Fantasy-Sky">
+                    <div class="caption">Bright-Wellman-Fantasy-Sky</div>
+                </div>
+            </div>
+            <h4>Takeaways: </h4> In this process, after blending together images with a basic vertical mask, I initially wanted to insert an object into an image with an irregular mask. However, as seen above, this didn't work out too well due to the differing colors in the images and the different FOV of the pictures.
+            I then tried just blending the sky. However, this also looked slightly irregular due to the differing colors of my desired sky and the shadows of the image. Finally, I used different shaded skies to blend with the building, which I was able to blend together successfully. Another thing to note was that I created my irregular masks by drawing them by hand in photoshop.
+            The jagged edges in these masks were unnoticeable in the final image because of the Gaussian blurring process of the mask. 
+        </div>
+    </div>
+    </body>
+</html>
