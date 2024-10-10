@@ -2,7 +2,7 @@ html {
     color: #333;
 }
 body {
-    background-color:#fff;
+    background-color:#f2f2f2;
 }
 .section {
     display: flex;
@@ -31,7 +31,7 @@ body {
     flex-direction: column;
     text-align: center;
     object-fit: contain;
-    margin: 10px;
+    margin: 25px 10px 25px 10px;
     position: relative;
 }
 .img-container #vertical-img {
