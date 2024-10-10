@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS180 Project 3</title>
+    <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <script src="../assets/js/script.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Face Morphing</h1>
+        <h2>By: Evan Chang</h2>
+        <h2>CS180 Project 3</h2>
+    </header>
+    <div class="section">
+        <h3>Introduction</h3>
+        <div class="section-body">
+            <p>
+                In this project, I explored the concepts of "morphing" faces into other faces and figuring out the "average" face of populations.
+                I used an image of myself and morphed it into different images of other people and into the average face shape of a population.
+            </p>
+        </div>
+    <div class="section">
+        <h3>Part 1: Defining Correspondences</h3>
+        <div class="section-body">
+            <p>
+                To begin to morph my face into another person's face, we first must ensure the images line up with each other.
+                This is done by defining corresponding points on both images and then proceeding to warp our images into the same "shape."
+                We do this by manually choosing points corresponding to relevant features of our portrait, and then using these points to define a triangulation.
+                We can then determine a transformation matrix to warp our triangles to our desired geometry.
+            </p>
+            <p>
+                I implemented this using <code>ginput</code> from the <code>matplotlib</code> library to allow me to click on points on the image. I then used a Delaunay Triangulation to define triangles since this will not produce overly skinny triangles.
+                I did this on the average of the landmark points between the images I wanted to morph so that it would be the same triangulation for both images. Here are my points I plotted and the resulting triangulation:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/keypoints.png">
+                    <div class="caption">Faces with keypoints plotted</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/triangles.png">
+                    <div class="caption">Delaunay Triangulation of Faces</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Part 2: Computing the "Mid-Way Face"</h3>
+        <div class="section-body">
+            After defining the correspondence keypoints in our two faces and defining the traingulation, we can now create a "mid-way" face between the two.
+            This is done by warping both faces into the average keypoint location, and then averaging the two images along all color channels.
+            We can accomplish this warping by computing an affine transformation between corresponding triangles and performing an inverse warp between the two images.
+            Here is the result of the "mid-way" face between my face and George Clooney's face:
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/evan_warped.png">
+                    <div class="caption">Me Warped</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/george_warped.png">
+                    <div class="caption">George Warped</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/midway_face.png" alt="Midway Face">
+                    <div class="caption">Midway Face</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Part 3: The Morph Sequence</h3>
+        <div class="section-body">
+            <p>
+                We can now produce a smooth warp between our two images using a very similar process as we did for creating the "mid-way" face.
+                Producing a morph sequence is the same thing as producing intermediate images of the two faces morphed to each other according to some factor of how much of each we want to moprh at that point.
+                We can use the same inverse transform function used in Part 2 with goal points being some linearly interpolated point between the two sets of keypoints.
+                Here is the result of the morph sequence between my face and George Clooney's face:
+            </p>
+            <div class="img-row">
+                <div class="results-imgs">
+                    <img src="assets/imgs/basic_morph.gif" alt="Morph between my face and George Clooney's face">
+                    <div class="caption">Morph Sequence</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Part 4: The "Mean Face" of a Population</h3>
+        <div class="section-body">
+            <p>
+                We can now compute the "mean face" of a population by averaging the keypoint locations of a set of images and then morphing all the images to this mean face.
+                This is done by averaging the keypoint locations of all the images and then morphing all the images to this mean face. We can then achieve our mean face by averaging all of these morphed images.
+                The dataset I used for this was the <a href="https://fei.edu.br/~cet/facedatabase.html">FEI Face Database</a>, and I used spatially normalized, frontal images from this dataset.
+                In creating this mean face, I warped each face into the average shape. Here are some examples of that:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/fei_images_ex.png" alt="Example Images from the FEI Database">
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/fei_images_ex_warped.png" alt="Example Images from the FEI Database Warped">
+                </div>
+            </div>
+            <p>
+                Here is the result of the "mean face" of the population:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/avg_fei.jpg" alt="Mean Face">
+                    <div class="caption">Mean Face</div>
+                </div>
+            </div>
+            <p>
+                I also played around with warping my face to match the average shape and the average shape to match my geometry:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/avg_fei_warped.jpg" alt="Average FEI Face Warped">
+                    <div class="caption">Average Face Warped</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/evan_fei_warped.jpg" alt="My Face Warped">
+                    <div class="caption">My Face Warped</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Part 5: Caricatures</h3>
+        <p>
+            We can also extrapolate from the population averages to create caricatures.
+            We can use the mean we calculated in the previous part to extrapolate features from myself using the formula:
+            \[\text{extrapolated} = \text{average} + \alpha \cdot \text{img}\]
+            Where we are performing our operations pixel by pixel and alpha is a parameter controlling how much extrapolation we perform.
+            Here are the results of creating caricatures of myself for differing values of alpha:
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/caricatures.png" alt="Caricatures of my Face">
+                <div class="caption">Caricatures of my Face</div>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Bells and Whistles: PCA Basis</h3>
+        <p>
+            We can construct a PCA basis for the keypoints of all of the images. This is the basis that best captures the variance in the data.
+            While we initially zero-mean our data before constructing our PCA basis, we can better visualize the basis by adding back the mean and showing the landmark points on the average face.
+            We can see that most of these keypoints look the same, which is most likely due to the fact that all of these images in the dataset were already transformed to have features in very similar places.
+            We can also visualize the variance captured by the PCA basis by looking at the eigenvalues associated with each PCA vector.
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/pca_basis.png" alt="Visualization of PCA Basis">
+                <div class="caption">Visualization of PCA Basis on FEI Average Face</div>
+            </div>
+        </div>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/pca_stems.png" alt="Stem Plot of Eigenvalues">
+                <div class="caption">Visualizaiton of Eigenvalues</div>
+            </div>
+        </div>
+        <p>
+            We can now use this PCA basis to perform transformations such as the caricatures we did in Part 5.
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/pca_caricatures.png" alt="Images of Caricatures achieved using PCA Bases">
+                <div class="caption">PCA Caricatures</div>
+            </div>
+        </div>
+        <p>
+            Comparing our original caricatures to our PCA caricatures, it seems like our PCA caricatures do not extrapolate quite as much as our original.
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/pca_caricatures_comp.png" alt="Comparison of Caricatures done using PCA">
+                <div class="caption">Comparison Between Caricatures (Top: Original Caricatures, Bottom: Caricatures done Using the First PCA vector)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
