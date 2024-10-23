@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS180 Project 4</title>
+    <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <script src="../assets/js/script.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Image Mosaics</h1>
+        <h2>Evan Chang</h2>
+        <h2>CS180 Project 4</h2>
+    </header>
+    <div class="section">
+        <h3>Introduction</h3>
+        <div class="section-body">
+            <p>
+                In this project, I explored creating simple image mosaics using homographies and multi-resolution blending.
+                All of these image mosaics were created using images I took while trying my best to preserve the center of projection in order for homographies to be able to warp them correctly.
+                Due to this, I attempted to use images that were of more landscape and with as little movement as possible. I took sets of three pictures that could be stitched from left to right.
+            </p>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Image Warping and Mosaicing</h3>
+        <h4>Recovering Homographies</h4>
+        <div class="section-body">
+            <p>
+                After taking my pictures, I manually marked correspondences in my images between two views. I also manually marked corners on the images corresponding to the extent of the images to include in my mosaic.
+                Using these pairs of correspondences, I could recover the Homography matrix satisfying the relationship \(p'=\matrix{H}p\), where the homography matrix <b>H</b> has 8 degrees of freedom.
+                Since each point pair gives us two equations, we need at least \(4\) correspondence pairs to solve for our homography matrix. However, if we can provide more, we can end up with a more robust solution by solving a least squares problem.
+                Our homography matrix is a \(3 \times 3\) matrix of the form:
+                \[
+                    H = \begin{bmatrix} a & b & c \\ d & e & f \\ g & h & 1 \end{bmatrix} 
+                \]
+                Flattening out this matrix and setting up the system of equations by plugging in our correspondence points, we get the following system of equations we can solve by Least Squares:
+                \[
+                    \begin{bmatrix}
+                        x_1 & y_1 & 1 & 0 & 0 & 0 & -x_1x_1' & -y_1x_1' \\
+                        0 & 0 & 0 & x_1 & y_1 & 1 & -x_1y_1' & -y_1y_1' \\
+                        x_2 & y_2 & 1 & 0 & 0 & 0 & -x_2x_2' & -y_2x_2' \\
+                        0 & 0 & 0 & x_2 & y_2 & 1 & -x_2y_2' & -y_2y_2' \\
+                        & & & & \vdots & & & \\
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                        a \\ b \\ c \\ d \\ e \\ f \\ g \\ h
+                    \end{bmatrix}
+                    = 
+                    \begin{bmatrix}
+                        x_1' \\ y_1' \\ x_2' \\ y_2' \\
+                        \vdots
+                    \end{bmatrix}
+                \]
+            </p>
+        </div>
+        <h4>Image Warping and Rectification</h4>
+        <div class="section-body">
+            <p>
+                Now that we have a homography matrix between two sets of correspondence points, we can use this matrix to warp images into different perspectives.
+                I used the homography matrix to first forward warp my defined corner points, and then I used an inverse warp on all of the points inside this defined region.
+                I used <code>scipy.interpolate.RegularGridInterpolator</code> to interpolate the original pixel values of these new warped points.
+            </p>
+            <p>
+                An interesting use of this homography matrix that also was a good test of its accuracy was to rectify images. 
+                I chose a rectangular portion of my images and then warped them to a rectangular shape (I arbitrarily chose a base and height dimension for my rectangles).
+            </p>
+            <h6>Rectification Results:</h6>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/ive_sign.jpg" alt="Picture of a sign in Oakland Arena for IVE">
+                    <div class="caption">Original Image</div>
+                </div>"
+                <div class="image-container">
+                    <img src="assets/imgs/ive_sign_rect.png" alt="Rectified Image of a sign in Oakland Arena for IVE">
+                    <div class="caption">Rectified Portion of Image</div>
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_left.jpg" alt="Image of left portion of entrance way of Giannini Hall">
+                    <div class="caption">Original Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_left_rect.jpg" alt="Rectified Image of a picture frame on the left side of Giannini Hall">
+                    <div class="caption">Rectified Portion of Image</div>
+                </div>
+            </div>"
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/gidle_concert.jpg" alt="Image of a concert stage of (G)-IDLE">
+                    <div class="caption">Original Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/gidle_concert_rect.jpg" alt="Rectified Image of a concert screen of (G)-IDLE">
+                    <div class="caption">Rectified Portion of Image</div>
+                </div>
+            </div>
+            <p>
+                We can also use this same warping procedure to warp images into the same perspective to be used for image mosaics.
+                Instead of warping to a rectangular region, we can warp correspondences from one image to another to get two images taken from different angles to be in the same perspective.
+            </p>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_left.jpg" alt="Image of left portion of entrance way of Giannini Hall">
+                    <div class="caption">Left Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_left_warped.jpg" alt="Warped image of right portion of entrance way of giannini hall">
+                    <div class="caption">Left Image (Perspective of Middle)</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/gianni_mid.jpg" alt="Image of middle portion of entrance way of Giannini Hall">
+                    <div class="caption">Middle Image</div>
+                </div>
+            </div>
+        </div>
+        <h4>Image Mosaics</h4>
+        <div class="section">
+            <p>
+                To convert my sets of images into image mosaics, I first had to warp all of the images into the same perspective using the method described in the previous section.
+                I designated one "middle" image which all of the other images would be warped to. I then lined up the images according to the location of the correspondences of the middle image, and allocated space around to fit the other images.
+                I then used a binary mask of the image shapes followed by a distance transform to construct a blending mask for the images. 
+                The distance transform represents the distance of each pixel to the nearest edge of the binary mask (I used Euclidean Distance). 
+                This could be considered as a representation of the "weight" of each pixel based on its distance from the "center" of the image.
+            </p>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/left_bwdist.png" alt="Distance Transform of Left Image">
+                    <div class="caption">Distance Transform of Left Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/mid_bwdist.png" alt="Distance Transform of Middle Image">
+                    <div class="caption">Distance Transform of Middle Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/right_bwdist.png" alt="Distance Transform of Right Image">
+                    <div class="caption">Distance Transform of Right Image</div>
+                </div>
+            </div>
+            <p>
+                I then used the distance transform to create the final blending mask I used by comparing the distance transforms of each image to create a binary mask.
+                With this blending mask and the warped and aligned images, I could then blend the images together using a Laplacian Stack to create the final image mosaic.
+                I ended up finding that when taking my pictures, I rotated quite a bit between perspectives, so this created a very warped image mosaic. 
+                This also made it slightly difficult to fully blend out the edges between the images (I also used images that were slightly too large, so the code would often crash my notebook kernel). 
+            </p>
+            <h4>Image Mosaic Results: </h4>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_left.jpg" alt="Image of left portion of entrance way of Giannini Hall">
+                    <div class="caption">Left Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_mid.jpg" alt="Image of middle portion of entrance way of Giannini Hall">
+                    <div class="caption">Middle Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_right.jpg" alt="Image of right portion of entrance way of Giannini Hall">
+                    <div class="caption">Right Image</div>
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/giannini_blend.jpg" alt="Blended Image of entrance way of Giannini Hall">
+                    <div class="caption">Blended Image</div>
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/cnr_left.jpg" alt="Image of left portion of area of College of Natural Resources Parking Lot">
+                    <div class="caption">Left Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/cnr_mid.jpg" alt="Image of middle portion of area of College of Natural Resources Parking Lot">
+                    <div class="caption">Middle Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/cnr_right.jpg" alt="Image of right portion of area of College of Natural Resources Parking Lot">
+                    <div class="caption">Right Image</div>
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/cnr_blend.jpg" alt="Blended Image of area of College of Natural Resources Parking Lot">
+                    <div class="caption">Blended Image</div>
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/tower_bottom.jpg" alt="Image of bottom portion of Sather Tower">
+                    <div class="caption">Bottom Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/tower_mid.jpg" alt="Image of middle portion of Sather Tower">
+                    <div class="caption">Middle Image</div>
+                </div>
+                <div class="image-container">
+                    <img src="assets/imgs/tower_top.jpg" alt="Image of top portion of Sather Tower">
+                    <div class="caption">Top Image</div>
+                </div>
+            </div>
+            <div class="image-row">
+                <div class="image-container">
+                    <img src="assets/imgs/tower_blend.jpg" alt="Blended Image of Sather Tower">
+                    <div class="caption">Blended Image</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

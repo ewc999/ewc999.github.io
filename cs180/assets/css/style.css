@@ -20,8 +20,8 @@ body {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 2% 0;
-    gap: 20px;
+    padding: 1% 0;
+    gap: 5px;
     width: 80vw;
     margin-right: auto;
     margin-left: auto;
@@ -49,8 +49,8 @@ body {
     color: #fff;
     background-color: rgba(0, 0, 0, 0.5);
     padding: 10px;
-    position: absolute;
-    top: 100%;
+    position: relative;
+    top: 0;
     left: 0;
     width: 100%;
     text-align: center;
