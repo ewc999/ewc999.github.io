@@ -207,6 +207,165 @@
             </div>
         </div>
     </div>
+    <div class="section">
+        <div class="section-body">
+            <h3>Feature Matching for Autostitching</h3>
+            <p>
+                We can make our jobs easier by finding a way to automatically stitch our images together.
+                In the previous parts, I would manually choose good correspondences between each image, but we can do this automatically by using the methods proposed by Brown et. al. in their paper <a href="https://inst.eecs.berkeley.edu/~cs180/fa24/hw/proj4/Papers/MOPS.pdf">"Multi-Image Matching using Multi-Scale Oriented Patches</a>.
+            </p>
+            <h4>Harris Interest Point Detector</h4>
+            <p>
+                The first step we perform is detecting parts of the image that we define to be nice correspondence points. These "corners" are points in the image where the gradient of the image is high in all directions.
+                We can detect these points by using the Harris Interest Point Detector. This detector uses the following formula to calculate the "cornerness" of a point:
+                \[
+                    R = \frac{\det(M)}{(\text{trace}(M))}
+                \]
+                Where \(M\) is our second moment matrix calculated from the gradients in our image.
+            </p>
+           Here are some examples of our Harris Interest Points on an image:
+           <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/harris_corners_full.png" alt="Harris Interest Points on an Image">
+                    <div class="caption">Harris Interest Points</div>
+                </div>
+           </div> 
+           <h4>Adaptive Non-Maximal Suppression</h4>
+           <p>
+                As we noticed, we have many interest points, and they are not well distributed across our image. Because we are taking images from multiple perspectives, we want to make sure we have a good distribution of points across our image to match with other images.
+                We can do this by using Adaptive Non-Maximal Suppression. This method works by choosing the strongest points based on the Harris values and then suppressing points that are too close to each other (we also add a robustness factor to ensure points are strong enough to suppress their neighbors).
+                I used this method to extract the best 500 points from our Harris Interest Points.
+           </p>
+            We can clearly see that our points are now more evenly distributed across our image compared to the full version and a naive threshold on the Harris values:
+           <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/full_harris_corners.png" alt="Harris Interest Points on an Image">
+                    <div class="caption">Harris Interest Points</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/threshold_harris_corners.png" alt="Harris Interest Points on an Image (Thresholded)">
+                    <div class="caption">Naive Thresholded Points</div>
+                </div>"
+                <div class="img-container">
+                    <img src="assets/imgs/anms_corners.png" alt="Adaptive Non-Maximal Suppression on Harris Interest Points">
+                    <div class="caption">Points after ANMS</div>
+                </div>
+            </div>
+            <h4>Extracting Feature Descriptors</h4>
+            <p>
+                Now that we have our interest points, we need to extract feature descriptors from these points. These descriptors are what we will use to match points between images.
+                We can use a version of Multi-Scale Oriented Patches (MOPS) method to extract these descriptors. This method works by taking a 40x40 patch around our interest points, and downsampling this patch to 8x8.
+                The original paper also uses rotation-invariance to allow for better features, but I did not implement this in my project.
+                After we extract these patches, we normalize our patches to have zero mean and unit variance.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/feature_vecs.png" alt="Feature Descriptors of Interest Points">
+                    <div class="caption">Randomly Slected Feature Descriptors of Our Image</div>
+                </div>
+            </div>
+            <h4>Feature Matching</h4>
+            <p>
+                Now that we have our feature descriptor vectors, we can match these vectors between images to find correspondences.
+                While we could do a simple metric of actual distance between two images and choosing the best for each, not every feature patch in our image has a match in the corresponding image.
+                This means it is better to use a discriminator approach. We can do this by comparing the error of the 1-Nearest Neighbor to the error of the 2-Nearest Neighbor.
+                If the ratio of the two errors is less than a certain threshold, we can consider this a good match.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/correspondence_matches.png" alt="Feature Matches between Two Images">
+                    <div class="caption">Feature Matches between Two Images</div>
+                </div>
+            </div>
+            <h4>RANSAC</h4>
+            <p>
+                Our final step for automatically determining correspondence points is to use RANSAC (Random Sample Consensus) to filter out outlier points.
+                RANSAC works by randomly choosing 4 points from our matches and calculating a homography matrix from these points. We then use this homography matrix to warp our points and see how many points are inliers.
+                We repeat this process for a certain number of iterations and choose the homography matrix with the most inliers. These are considered our final matching points we can use for our image mosaic warpings. 
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/ransac_matches.png" alt="RANSAC Matches between Two Images">
+                    <div class="caption">RANSAC Matches between Two Images</div>
+                </div>
+            </div>
+            As we can see, using RANSAC significantly reduces our number of matches to only the best matches between our images.
+        </div>
+        <p>
+        <h4>Results:</h4>
+        <p>
+            We can then use these to warp our images into the same perspective and into mosaics as we did in the previous part.
+            As can be seen below, this worked about as well as my manual correspondences did, but it was much faster and less tedious.
+        </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/tower_blend.jpg" alt="Blended Image of Sather Tower">
+                <div class="caption">Manual Correspondences</div>
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/tower_mosaic_auto.jpg" alt="Blended Image of Sather Tower">
+                <div class="caption">Automatic Correspondences</div>
+            </div>
+        </div>
+        <h4>More Results: </h4>
+        <p>Original Images:</p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/sun_moon_lake_1.jpg" alt="Image of Sun Moon Lake">
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/sun_moon_lake_2.jpg" alt="Image of Sun Moon Lake">
+            </div>
+        </div>
+        <p>Image Mosaic: </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/lake_mosaic_auto.jpg" alt="Blended Image of Sun Moon Lake">
+            </div>
+        </div>
+        <p>Original Images:</p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/landscape_1.jpg" alt="Image from Greek Theatre">
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/landscape_2.jpg" alt="Image from Greek Theatre">
+            </div>
+        </div>
+        <p>Image Mosaic: </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/landscape_mosaic_auto.jpg" alt="Blended Image from Greek Theatre">
+            </div>
+        </div>
+        <p>Original Images:</p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/edinburgh_1.jpg" alt="Image from Edinburgh Castle">
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/edinburgh_2.jpg" alt="Image from Edinburgh Castle">
+            </div>
+            <div class="img-container">
+                <img src="assets/imgs/edinburgh_3.jpg" alt="Image from Edinburgh Castle">
+            </div>
+        </div>
+        <p>Image Mosaic: </p>
+        <div class="img-row">
+            <div class="img-container">
+                <img src="assets/imgs/edinburgh_mosaic_auto.jpg" alt="Blended Image from Edinburgh Castle">
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Conclusion</h3>
+        <p>
+            I found this project to be quite fun. It was really interesting to be able to warp images into different perspectives and blend them together to create a single image.
+            My favorite part of this project was probably the rectification, as it worked really well and was quite interesting to see the results of. I struggled a bit with my image mosaics, as the images I had chose were 
+            a little bit too much of a change of perspective, so the warping created large distortions. The blending also was not as smooth as I would have liked due to these sharp changes in perspective as well. I also had some issues with the size of my images, as they were too large and would often crash my notebook kernel (although I realized I should have just resized my images, which is what I did after part 1 of the project).
+            I also enjoyed trying out the automatic feature matching since it was quite tedious to manually match point by point each time (although this did not work quite as well as manually finding points).
+            Unfortunately, since many of the images I had chosen to use in the beginning did not have a lot of parts of the image conducive to the auto-matching algorithm I implemented, I had to find some new images to use. These images did tend to turn out even better though, as I took them with better knowledge of what images worked well for this project.
+        </p>
     </div>
 </body>
 </html>
