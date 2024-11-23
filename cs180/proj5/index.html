@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS180 Project 5</title>
+    <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <script src="../assets/js/script.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Diffusion Models</h1>
+        <h2>Evan Chang</h2>
+        <h2>CS180 Project 5</h2>
+    </header>
+    <div class="section">
+        <h3>Introduction</h3>
+        <div class="section-body">
+            <p>
+                In this project, we experimented with generating images using a diffusion model. 
+                A diffusion model is a generative model that is trained to iteratively remove the noise from an image.
+                We can use this to generate images by starting with an image of pure noise and then applying the diffusion model to generate a new image on the manifold of "real" images.
+                In part a, I explored the capabilities of diffusion models using a two-stage, pre-trained <b>DeepFloyd IF</b> model. In part b, I trained a diffusion model from scratch and tested it on 
+                images in the MNIST digits dataset.
+            </p>
+        </div>
+    </div>
+    <div class="section">
+        <h3>Part A: The Power of Diffusion Models!</h3>
+        <div class="section-body">
+            <h4>Part 0: Playing with Diffusion</h4>
+            <p>Note: To ensure deterministic outputs, for the rest of this part, I set the random seed \(180\).</p>
+            <p>
+                In this part, we experimented with the DeepFloyd IF model, a pre-trained diffusion model that can generate images. This two-stage model was trained as a text-to-image model, and has 1000 timesteps in the diffusion process.
+                We give this model some text embeddings that we can use to generate images. I used three prompts and tested out image generation using the DeepFloyd model, modifying the number of inference steps in the diffusion process for both stages of the model.
+                Here are the resulting images and prompts I used:
+            </p> 
+            <div class="img-row-header"> "an oil painting of a snowy mountain" </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_5_5.png" alt="snowy_village_5_5">
+                    <div class="caption">stage_1 steps: 5, stage_2 steps: 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_5_20.png" alt="snowy_village_5_20">
+                    <div class="caption">stage_1 steps: 5, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_20_5.png" alt="snowy_village_20_5">
+                    <div class="caption">stage_1 steps: 20, stage_2 steps: 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_default.png" alt="snowy_village_20_20">
+                    <div class="caption">stage_1 steps: 20, stage_2 steps: 20</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_30_10.png" alt="snowy_village_30_10">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 10</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_30_20.png" alt="snowy_village_30_20">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_30_30.png" alt="snowy_village_30_30">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 30</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_50_20.png" alt="snowy_village_50_20">
+                    <div class="caption">stage_1 steps: 50, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_50_50.png" alt="snowy_village_50_50">
+                    <div class="caption">stage_1 steps: 50, stage_2 steps: 50</div>
+                </div>"
+                <div class="img-container">
+                    <img src="assets/imgs/part0/snowy_village_100_100.png" alt="snowy_village_100_100">
+                    <div class="caption">stage_1 steps: 100, stage_2 steps: 100</div>
+                </div>
+            </div>
+            <div class="img-row-header"> "a man wearing a hat" </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_5_5.png" alt="hat_5_5">
+                    <div class="caption">stage_1 steps: 5, stage_2 steps: 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_5_20.png" alt="hat_5_20">
+                    <div class="caption">stage_1 steps: 5, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_20_5.png" alt="hat_20_5">
+                    <div class="caption">stage_1 steps: 20, stage_2 steps: 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_default.png" alt="hat_20_20">
+                    <div class="caption">stage_1 steps: 20, stage_2 steps: 20</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_30_10.png" alt="hat_30_10">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 10</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_30_20.png" alt="hat_30_20">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_30_30.png" alt="hat_30_30">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 30</div>
+                </div>
+            </div>"
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_50_20.png" alt="hat_50_20">
+                    <div class="caption">stage_1 steps: 50, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_50_50.png" alt="hat_50_50">
+                    <div class="caption">stage_1 steps: 50, stage_2 steps: 50</div>
+                </div>"
+                <div class="img-container">
+                    <img src="assets/imgs/part0/hat_100_100.png" alt="hat_100_100">
+                    <div class="caption">stage_1 steps: 100, stage_2 steps: 100</div>
+                </div>
+            </div>
+            <div class="img-row-header"> "a rocket ship" </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_5_5.png" alt="rocket_5_5">
+                    <div class="caption">stage_1 steps: 5, stage_2 steps: 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_5_20.png" alt="rocket_5_20">
+                    <div class="caption">stage_1 steps: 5, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_20_5.png" alt="rocket_20_5">
+                    <div class="caption">stage_1 steps: 20, stage_2 steps: 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_default.png" alt="rocket_20_20">
+                    <div class="caption">stage_1 steps: 20, stage_2 steps: 20</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_30_10.png" alt="rocket_30_10">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 10</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_30_20.png" alt="rocket_30_20">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_30_30.png" alt="rocket_30_30">
+                    <div class="caption">stage_1 steps: 30, stage_2 steps: 30</div>
+                </div>
+            </div>"
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_50_20.png" alt="rocket_50_20">
+                    <div class="caption">stage_1 steps: 50, stage_2 steps: 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_50_50.png" alt="rocket_50_50">
+                    <div class="caption">stage_1 steps: 50, stage_2 steps: 50</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part0/rocket_100_100.png" alt="rocket_100_100">
+                    <div class="caption">stage_1 steps: 100, stage_2 steps: 100</div>
+                </div>
+            </div>
+            <p>
+                We can see that the number of steps in the diffusion process affects the quality of the generated images. 
+                With fewer steps, the images are more blurry and less detailed. With more steps, the images become more clear and detailed.
+                The number of steps in the first stage of the diffusion process seems to affect the overall structure of the image, while the number of steps in the second stage affects the details.
+                However, after a certain point, the image quality no longer seems to get any better. 
+            <h4>Part 1: Sampling Loops</h4>
+            In this part we will be implementing sampling loops and using these loops to accomplish tasks such as inpainting and producing opticial illusions.
+            <h5>Forward Process:</h5>
+            <p>
+                We started this part by implementing the forward process of the diffusion model (noising and scaling an image), defined by the following equation:
+                \[
+                    q(x_t | x_0) = N\left(x_t; \sqrt{\bar{\alpha}}x_0, (1-\bar{\alpha}_t)\mathbf{I}\right) 
+                \]
+                which is equivalent to:
+                \[
+                    x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1 - \bar{\alpha}_t}\epsilon \quad \text{where} \quad \epsilon \sim N(0, \mathbf{I})
+                \]
+                This gives us a noisy image \(x_t\) given a clean image \(x_0\). We not only add gaussian noise to our image, but also scale by 
+                our noise coefficients \(\bar{\alpha}_t\), coefficients that are close to \(1\) at the beginning of the diffusion process and close to \(0\) at the end.
+                (Note: noise coeffiicents were chosen by the people who trained DeepFloyd).
+                We can visualize our forward process on a small image of the Berkeley Campanile:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile.png" alt="campanile">
+                    <div class="caption">Original Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/noisy_test_im_250.png" alt="noisy_test_im_250">
+                    <div class="caption">Noisy Image at t=250</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/noisy_test_im_500.png" alt="noisy_test_im_500">
+                    <div class="caption">Noisy Image at t=500</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/noisy_test_im_750.png" alt="noisy_test_im_750">
+                    <div class="caption">Noisy Image at t=750</div>
+                </div>
+            </div>
+            <h4>Classical Denoising:</h4>
+            <p>
+                We can now take these noisy images we genearted and try to remove the noise.
+                One of the simplest methods we can use is to try a <b>Gauussian blur filter</b> to try to remove as much of the noise as possible.
+                This is because noise is often quite high frequency, so blurring the image can help remove some of the noise.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/gaussblur_test_im_250.png" alt="gaussblur_test_im_250">
+                    <div class="caption">Gaussian Blur Denoising at t=250</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/gaussblur_test_im_500.png" alt="gaussblur_test_im_500">
+                    <div class="caption">Gaussian Blur Denoising at t=500</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/gaussblur_test_im_750.png" alt="gaussblur_test_im_750">
+                    <div class="caption">Gaussian Blur Denoising at t=750</div>
+                </div>
+            </div>
+            <p>Comparing to the noisy images above, it is clear that we have removed some noise, but the results still are not great. We still have very unclear images containing noise, especially for the images at higher timesteps.</p>
+            <h4>One-Step Denoising:</h4>
+            <p>
+                We can try to do a better job of denoising by using our diffusion models (specifically within the first stage of our DeepFloyd model).
+                This is a UNet that can be used to predict the Gaussian noise contained in the image. Once we have this noise, we can remove this noise and attempt to recover our original image.
+                Since this is a test-to-image model, we also provide a text conditioning which is the prompt "a high quality photo."
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/noisy_test_im_250.png" alt="noisy_test_im_250">
+                    <div class="caption">Noisy Campanile at t=250</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/noisy_test_im_500.png" alt="noisy_test_im_500">
+                    <div class="caption">Noisy Campanile at t=500</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/noisy_test_im_750.png" alt="noisy_test_im_750">
+                    <div class="caption">Noisy Campanile at t=750</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/onestep_test_im_250.png" alt="onestep_test_im_500">
+                    <div class="caption">One-Step Denoised Campanile at t=250</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/onestep_test_im_500.png" alt="onestep_test_im_750">
+                    <div class="caption">One-Step Denoised Campanile at t=500</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/onestep_test_im_750.png" alt="onestep_test_im_750">
+                    <div class="caption">One-Step Denoised Campanile at t=750</div>
+                </div>
+            </div>
+            <p>
+                Comparing to the Gaussian blur denoising, we can see that the one-step denoising does a much better job of removing the noise added to the image. We no longer see any of the small specs of noise in any of our images.
+                However, we can still see that the results are quite blurry for higher tiemsteps. 
+            </p>
+            <h4>Iterative Denoising:</h4>
+            <p>
+                In order to get our denoising to be even better, instead of jumping straight to the denoised image \(x_0\), we can attempt to take multiple steps to reach there.
+                This can be done following this expression for a timestep \(t\) (where higher timestep means more noise):
+                \[
+                    x_{t'} = \frac{\sqrt{\bar{\alpha}_{t'}}\beta_t}{1-\bar{\alpha}_t}x_0 + 
+                    \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t'})}{1-\bar{\alpha}_t}x_{t} + v_\sigma
+                \]
+                where 
+                <ul>
+                    <li>\(x_{t}\) is the denoised image at timestep \(t\)</li>
+                    <li>\(x_{t'}\) is the denoised image at timestep \(t'\) where \(t'\lt t\) (less noisy)</li>
+                    <li>\(\bar{\alpha}_t\) is our denoising coefficients</li>
+                    <li>\(\alpha_t = \frac{\bar{\alpha}_t}{\bar{\alpha}_{t'}}\)</li>
+                    <li>\(\beta_t = 1-\alpha_t\)</li>
+                    <li>\(x_0\) is our current estimate of the clean image using the equation from the One-Step Denoising section</li>
+                    <li>\(v_\sigma\) is random noise predicted by our model</li>
+                </ul>
+                The intermediate steps can be thought of as a linear interpolation between the signal and noise. While we could go through all 1000 timesteps, we can also use a stride to speed up the process significantly without too much of a loss in quality.
+                We chose a stride of 30 for our iterative denoising and started at timestep 990. We can then implement our iterative denoise: 
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/iterative_denoise_90.png" alt="iterative_denoise_90">
+                    <div class="caption">Noisy Campanile at t=90</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/iterative_denoise_240.png" alt="iterative_denoise_240">
+                    <div class="caption">Noisy Campanile at t=240</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/iterative_denoise_390.png" alt="iterative_denoise_390">
+                    <div class="caption">Noisy Campanile at t=390</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/iterative_denoise_540.png" alt="iterative_denoise_540">
+                    <div class="caption">Noisy Campanile at t=540</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/iterative_denoise_690.png" alt="iterative_denoise_690">
+                    <div class="caption">Noisy Campanile at t=690</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile.png" alt="campanile">
+                    <div class="caption">Original</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/iterative_denoise_final.png" alt="iterative_denoise_final">
+                    <div class="caption">Iteratively Denoised Campanile</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/onestep_test_im_final.png" alt="onestep_test_im_final">
+                    <div class="caption">One-Step Denoised Campanile</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/gaussblur_test_im_final.png" alt="gaussblur_test_im_final">
+                    <div class="caption">Gaussian Blur Denoised Campanile</div>
+                </div>
+            </div>
+            <p>
+                We can see that the iterative denoising does a much better job of removing the noise from the image. The final image is much clearer and more detailed than the one-step denoising and Gaussian blur denoising.
+                The iterative denoising process is able to remove the noise from the image while preserving most of the details of the original image.
+            </p>
+            <h4>Diffusion Model Sampling:</h4>
+            <p>
+                Now that we have an iterative denoise function, we can generate images from scratch. We can do so by starting from the first timestep and passing in purely random noise.
+                We can then give it the prompt "a high quality photo" and run our iterative denoise function:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sample_im_1.png" alt="sample_im_1">
+                    <div class="caption">Sample Image 1</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sample_im_2.png" alt="sample_im_2">
+                    <div class="caption">Sample Image 2</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sample_im_3.png" alt="sample_im_3">
+                    <div class="caption">Sample Image 3</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sample_im_4.png" alt="sample_im_4">
+                    <div class="caption">Sample Image 4</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sample_im_5.png" alt="sample_im_5">
+                    <div class="caption">Sample Image 5</div>
+                </div>
+            </div>
+            <h4>Classifier-Free Guidance (CFG):</h4>
+            <p>
+                We can see that our generated images are not particularly good, and some don't have any meaningful content in them.
+                We can improve the quality of our images by using a technique called Classifier-Free Guidance (although this does sacrifice some image diversity).
+                CFG is a technique where we use both a conditional noise estimate \(\epsilon_c\) and unconditional noise estimate \(\epsilon_u\) to form a new noise estimate.
+                \[
+                    \epsilon = \epsilon_u + \gamma(\epsilon_c - \epsilon_u)
+                \]
+                where \(\gamma\) is a hyperparameter that controls the strength of CFG. Our unconditioned noise estimate is given the empty string as a prompt and the conditioned noise estimate is once again given the prompt "a high quality photo."
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cfg_sample_1.png" alt="cfg_sample_1">
+                    <div class="caption">Sample 1 with CFG</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cfg_sample_2.png" alt="cfg_sample_2">
+                    <div class="caption">Sample 2 with CFG</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cfg_sample_3.png" alt="cfg_sample_3">
+                    <div class="caption">Sample 3 with CFG</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cfg_sample_4.png" alt="cfg_sample_4">
+                    <div class="caption">Sample 4 with CFG</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cfg_sample_5.png" alt="cfg_sample_5">
+                    <div class="caption">Sample 5 with CFG</div>
+                </div>
+            </div>
+            <p>
+                We can see that the images generated with CFG are much better images than those generated by basic sampling. However, we can see that there is a loss in diversity in the images generated with CFG, as we have multiple images of landscapes at sunset.
+                These are still a massive improvement in image quality, so we will use CFG in all of our image generation for the rest of this part.
+            </p>
+            <h4>Image-to-image Translation:</h4>
+            <p>
+                We can use a similar process as in our iterative denoising image to make edits to existing images. We can add noise to an image, and then denoise it to make edits to the image. The more noise we add, the greater the edits will be made.
+                Intuitively, what this is doing is adding noise to an existing image, and then forcing it back onto the manifold of natural images.
+                This is known as the <a href="https://sde-image-editing.github.io" target="_blank">SDEdit algorithm</a>.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sdedit_1.png" alt="sdedit_1">
+                    <div class="caption">SDEdit with <code>i_start=1</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sdedit_3.png" alt="sdedit_3">
+                    <div class="caption">SDEdit with <code>i_start=3</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sdedit_5.png" alt="sdedit_5">
+                    <div class="caption">SDEdit with <code>i_start=5</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sdedit_7.png" alt="sdedit_7">
+                    <div class="caption">SDEdit with <code>i_start=7</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sdedit_10.png" alt="sdedit_10">
+                    <div class="caption">SDEdit with <code>i_start=10</code></div>
+                </div> 
+                <div class="img-container">
+                    <img src="assets/imgs/part1/sdedit_20.png" alt="sdedit_20">
+                    <div class="caption">SDEdit with <code>i_start=20</code></div>
+                </div>
+            </div>
+            <p>We can see that we are generating a range of images that gradually look more like the original as less noise is added.</p>
+            <h4>Editing Hand-Drawn and Web Images</h4>
+            <p>
+                We can now do this same SDEdit procedure except by starting with nonrealistic images to start. We can experiment by using hand-drawn images and images taken from the web.
+            </p>
+            <div class="img-row-header">Hand-Drawn Images</div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill_1.png" alt="draw_hill_1">
+                    <div class="caption">Hand-Drawn Hill at <code>i_start=1</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill_3.png" alt="draw_hill_3">
+                    <div class="caption">Hand-Drawn Hill at <code>i_start=3</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill_5.png" alt="draw_hill_5">
+                    <div class="caption">Hand-Drawn Hill at <code>i_start=5</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill_7.png" alt="draw_hill_7">
+                    <div class="caption">Hand-Drawn Hill at <code>i_start=7</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill_10.png" alt="draw_hill_10">
+                    <div class="caption">Hand-Drawn Hill at <code>i_start=10</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill_20.png" alt="draw_hill_20">
+                    <div class="caption">Hand-Drawn Hill at <code>i_start=20</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/draw_hill.png" alt="draw_hill">
+                    <div class="caption">Original Hand-Drawn Hill</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck_1.png" alt="cybertruck_1">
+                    <div class="caption">Hand-Drawn Cybertruck at <code>i_start=1</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck_3.png" alt="cybertruck_3">
+                    <div class="caption">Hand-Drawn Cybertruck at <code>i_start=3</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck_5.png" alt="cybertruck_5">
+                    <div class="caption">Hand-Drawn Cybertruck at <code>i_start=5</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck_7.png" alt="cybertruck_7">
+                    <div class="caption">Hand-Drawn Cybertruck at <code>i_start=7</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck_10.png" alt="cybertruck_10">
+                    <div class="caption">Hand-Drawn Cybertruck at <code>i_start=10</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck_20.png" alt="cybertruck_20">
+                    <div class="caption">Hand-Drawn Cybertruck at <code>i_start=20</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/cybertruck.png" alt="cybertruck">
+                    <div class="caption">Original Hand-Drawn Cybertruck</div>
+                </div>
+            </div>
+            <div class="img-row-header">Web Images</div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_1.png" alt="wizard_1">
+                    <div class="caption">Wizard at <code>i_start=1</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_3.png" alt="wizard_3">
+                    <div class="caption">Wizard at <code>i_start=3</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_5.png" alt="wizard_5">
+                    <div class="caption">Wizard at <code>i_start=5</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_7.png" alt="wizard_7">
+                    <div class="caption">Wizard at <code>i_start=7</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_10.png" alt="wizard_10">
+                    <div class="caption">Wizard at <code>i_start=10</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_20.png" alt="wizard_20">
+                    <div class="caption">Wizard at <code>i_start=20</code></div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard.png" alt="wizard">
+                    <div class="caption">Original Wizard</div>
+                </div>
+            </div>
+            <h5>Inpainting</h5>
+            <p>
+                Another task we can accomplish with this process is inpainting. This is the same as the above portion except only for a chosen portion of our image.
+                We can take in an original image \(x_{\text{orig}}\) and a binary mask \(\mathbf{m}\) that is 1 where we want to inpaint and 0 where we want to keep the original image.
+                In our diffusion loop, our image is updated as follows:
+                \[
+                    x_{t} \leftarrow \mathbf{m}x_t + (1-\mathbf{m})\text{forward}(x_{\text{orig}}, t)
+                \]
+                This effectively replaces the masked portion of the image with the inpainted portion.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile.png" alt="campanile">
+                    <div class="caption">Original Campanile Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile_mask.png" alt="campanile_mask">
+                    <div class="caption">Campanile Mask</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile_top.png" alt="campanile_top">
+                    <div class="caption">Hole to Fill</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile_inpaint.png" alt="campanile_inpaint">
+                    <div class="caption">Inpainted Campanile</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard.png" alt="wizard">
+                    <div class="caption">Original Wizard Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_mask.png" alt="wizard_mask">
+                    <div class="caption">Wizard Mask</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_ball.png" alt="wizard_ball">
+                    <div class="caption">Hole to Fill</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/wizard_inpaint.png" alt="wizard_inpaint">
+                    <div class="caption">Inpainted Wizard</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/alex.jpeg" alt="alex">
+                    <div class="caption">Original Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/alex_mask.png" alt="alex_mask">
+                    <div class="caption">Mask</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/alex_inpaint_camera.png" alt="alex_inpaint">
+                    <div class="caption">Inpainted Image</div>
+                </div>
+            </div>
+            <h4>Text-Conditonal Image-to-image Translation</h4>
+            <p>
+                We can also guide the SDEdit process with a text prompt. We can do this simply by changing the text prompt from "a high quality photo" to a different text prompt of our choosing.
+                Here are the results for different text prompts and images:
+            </p>
+            <div class="img-row-header">"a rocket ship"</div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/rocket_ship_noise_1.png" alt="rocket_ship_noise_1">
+                    <div class="caption">Rocket Ship at noise level 1</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/rocket_ship_noise_3.png" alt="rocket_ship_noise_3">
+                    <div class="caption">Rocket Ship at noise level 3</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/rocket_ship_noise_5.png" alt="rocket_ship_noise_5">
+                    <div class="caption">Rocket Ship at noise level 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/rocket_ship_noise_7.png" alt="rocket_ship_noise_7">
+                    <div class="caption">Rocket Ship at noise level 7</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/rocket_ship_noise_10.png" alt="rocket_ship_noise_10">
+                    <div class="caption">Rocket Ship at noise level 10</div>
+                </div>  
+                <div class="img-container">
+                    <img src="assets/imgs/part1/rocket_ship_noise_20.png" alt="rocket_ship_noise_20">
+                    <div class="caption">Rocket Ship at noise level 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campanile.png" alt="rocket_ship">
+                    <div class="caption">Campanile</div>
+                </div>
+            </div>
+            <div class="img-row-header">"a photo of a hipster barista"</div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/barista_1.png" alt="barista_1">
+                    <div class="caption">Barista at noise level 1</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/barista_3.png" alt="barista_3">
+                    <div class="caption">Barista at noise level 3</div>
+                </div>  
+                <div class="img-container">
+                    <img src="assets/imgs/part1/barista_5.png" alt="barista_5">
+                    <div class="caption">Barista at noise level 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/barista_7.png" alt="barista_7">
+                    <div class="caption">Barista at noise level 7</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/barista_10.png" alt="barista_10">
+                    <div class="caption">Barista at noise level 10</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/barista_20.png" alt="barista_20">
+                    <div class="caption">Barista at noise level 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/alex.jpeg" alt="Alex">
+                    <div class="caption">Man Looking at Lightstick</div>
+                </div>"
+            </div>
+            <div class="img-row-header">"a photo of a dog"</div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/dog_noise_1.png" alt="dog_noise_1">
+                    <div class="caption">Dog at noise level 1</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/dog_noise_3.png" alt="dog_noise_3">
+                    <div class="caption">Dog at noise level 3</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/dog_noise_5.png" alt="dog_noise_5">
+                    <div class="caption">Dog at noise level 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/dog_noise_7.png" alt="dog_noise_7">
+                    <div class="caption">Dog at noise level 7</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/dog_noise_10.png" alt="dog_noise_10">
+                    <div class="caption">Dog at noise level 10</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/dog_noise_20.png" alt="dog_noise_20">
+                    <div class="caption">Dog at noise level 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/dom.jpeg" alt="dom">
+                    <div class="caption">Man Standing</div>
+                </div>
+            </div>
+            <div class="img-row-header">"a kpop idol"</div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/kpop_noise_1.png" alt="kpop_noise_1">
+                    <div class="caption">Kpop Idol at noise level 1</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/kpop_noise_3.png" alt="kpop_noise_3">
+                    <div class="caption">Kpop Idol at noise level 3</div>
+                </div>  
+                <div class="img-container">
+                    <img src="assets/imgs/part1/kpop_noise_5.png" alt="kpop_noise_5">
+                    <div class="caption">Kpop Idol at noise level 5</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/kpop_noise_7.png" alt="kpop_noise_7">
+                    <div class="caption">Kpop Idol at noise level 7</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/kpop_noise_10.png" alt="kpop_noise_10">
+                    <div class="caption">Kpop Idol at noise level 10</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/kpop_noise_20.png" alt="kpop_noise_20">
+                    <div class="caption">Kpop Idol at noise level 20</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/lance.jpeg" alt="lance">
+                    <div class="caption">Man who Loves Money</div>
+                </div>
+            </div>
+
+            <h4>Visual Anagrams:</h4>
+            <p>
+                Another interesting task we can accomplish using the sampling loops we have defined is creating visual anagrams, where we see a different image when flipping the image over.
+                We take the same steps of generating images based on text prompts by generating noise estimates for two images. However, after generating these images, we can average the noise estimates after flipping one of them before denoising to generate our anagram.
+                Here is the algorithm:
+                \begin{align*}
+                    \epsilon_1 &= \text{UNet}(x_t, t, p_1) \\
+                    \epsilon_2 &= \text{flip}(\text{UNet}(x_t, t, p_2)) \\
+                    \epsilon &= \frac{\epsilon_1 + \epsilon_2}{2}
+                \end{align*}
+                where \(p_1\) and \(p_2\) are the text prompts for the two images, and flip() is a function that rotates the images 180 degrees.
+                Once we have this new noise estimate we can implement the same denoising process to arrive at our anagrams.
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campfire_man_anagram.png" alt="campfire_man_anagram">
+                    <div class="caption">An Oil Painting of People Around a Campfire</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campfire_man_anagram.png" alt="campfire_man_anagram" style="transform:rotate(180deg)">
+                    <div class="caption">An Oil Painting of an Old Man</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/bird_village_hd.png" alt="bird_village_anagram">
+                    <div class="caption">A Seabird</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/bird_village_hd.png" alt="bird_village_anagram" style="transform: rotate(180deg)">
+                    <div class="caption">An Oil Painting of a Snowy Mountain village</div>
+                </div>
+            </div>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/man_dog_anagram.png" alt="man_dog_anagram">
+                    <div class="caption">A Photo of a Man</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/man_dog_anagram.png" alt="man_dog_anagram" style="transform: rotate(180deg)">
+                    <div class="caption">A Photo of a Dog</div>
+                </div>
+            </div>
+
+            <h4>Hybrid Images</h4>
+            <p>
+                One final task we can accomplish with our diffusion model sampling loops is forming hybrid images, images that show the one image close up, and a different image from far away.
+                We can do this in a similar way to the anagrams, where we generate noise estimates for two images, but instead of averaging them, we can sum the low frequency images from one image and high frequency components of another image.
+                Here is the algorithm:
+                \begin{align*}
+                    \epsilon_1 &= \text{UNet}(x_t, t, p_1)\\
+                    \epsilon_2 &= \text{UNet}(x_t, t, p_2)\\
+                    \epsilon &= f_{LP}(\epsilon_1) + f_{HP}(\epsilon_2)\\
+                \end{align*}
+                We use a gaussian blur of kernel size 33 and sigma 2 for our lowpass filter, and a highpass filter is defined as the original noise minus the lowpass noise obtained by the gaussian filter.
+                Once we have this new noise estimate we can implement the same denoising process to arrive at our hybrid images:
+            </p>
+            <div class="img-row">
+                <div class="img-container">
+                    <img src="assets/imgs/part1/skull_waterfall_hybrid.png" alt="skull_waterfall_hybrid">
+                    <div class="caption">Skull-Waterfall Hybrid Image</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/fish_man.png" alt="man_fish_hybrid">
+                    <div class="caption">Hybrid image of an old man and coral reef fish</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/campfire_snowy_village.png" alt="campfire_snowy_village">
+                    <div class="caption">Hybrid image of people around a campfire and a snowy mountain village</div>
+                </div>
+                <div class="img-container">
+                    <img src="assets/imgs/part1/old_man_village.png" alt="old man village hybrid">
+                    <div class="caption">Hybrid image of an old man and a snowy mountain village</div>
+                </div>
+            </div>
+            <!-- <h4>Conclusion: </h4>
+            <p>
+                It was quite interesting to be able to mess around with a diffusion model and see the results of the different tasks we could accomplish with it. My favorite 
+            </p> -->
+        </div>
+    </div>
